@@ -1,0 +1,2 @@
+Add-Content .gitignore "target/"
+Add-Content .gitignore "**/target/"

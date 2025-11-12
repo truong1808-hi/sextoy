@@ -1,0 +1,162 @@
+TỆP GHI CHÚ DỰ ÁN (NOTE.TXT)
+
+1. TẠI SAO TẠO TỆP NÀY?
+Tệp này được tạo theo yêu cầu, đóng vai trò là tài liệu kỹ thuật trung tâm, giải thích lý do tồn tại, ý nghĩa và tác dụng của MỌI tệp tin đã được cung cấp và sửa đổi trong dự án "toystore".
+
+2. MỤC ĐÍCH CỦA CÁC TỆP
+
+------------------------------------------------------
+## A. CỐT LÕI DỰ ÁN (MAVEN & CONFIG)
+------------------------------------------------------
+
+### pom.xml
+* **Lý do tạo:** Đây là tệp cấu hình trung tâm của Apache Maven.
+* **Ý nghĩa:** Nó khai báo "Tôi là một dự án Java Web" (`<packaging>war</packaging>`).
+* **Tác dụng:**
+    1.  **Quản lý thư viện:** Tự động tải về các thư viện cần thiết (dependencies) như `mysql-connector-j` (để kết nối CSDL), `jakarta.servlet-api` (để chạy Servlet), và `jstl` (để dùng thẻ JSTL trong JSP).
+    2.  **Cấu hình Build:** Chỉ định phiên bản Java (21) và tên tệp (`toystore.war`) sẽ được tạo ra khi build dự án.
+
+### src/main/webapp/WEB-INF/web.xml
+* **Lý do tạo:** Đây là tệp Cấu hình Triển khai (Deployment Descriptor) tiêu chuẩn của Java Web.
+* **Ý nghĩa:** Nó cung cấp các chỉ dẫn cho máy chủ (Tomcat) khi khởi động ứng dụng.
+* **Tác dụng:**
+    1.  **Trang chào mừng:** Thiết lập `<welcome-file>home</welcome-file>`, nghĩa là khi ai đó truy cập `.../toystore/`, Tomcat sẽ tự động chuyển hướng họ đến `/home` (được `HomeServlet` xử lý).
+    2.  **Quản lý Session:** Cấu hình thời gian hết hạn của session (`<session-timeout>`) là 60 phút.
+
+------------------------------------------------------
+## B. LOGIC BACKEND (CONTROLLER - SERVLET)
+------------------------------------------------------
+Các tệp này là "bộ não" của ứng dụng, xử lý các yêu cầu HTTP từ người dùng.
+
+### src/main/java/com/toystore/controller/HomeServlet.java
+* **Lý do tạo:** Xử lý trang chủ của người dùng (User).
+* **Tác dụng:**
+    1.  Được kích hoạt bởi URL `/home` (do `web.xml` trỏ đến).
+    2.  Gọi `DanhMucDAO` và `HinhAnhDAO` để lấy dữ liệu (4 danh mục chính và ảnh demo) từ CSDL.
+    3.  "Gắn" (setAttribute) dữ liệu này vào request.
+    4.  Chuyển tiếp (forward) yêu cầu đến tệp `user/index.jsp` để hiển thị.
+* **Trạng thái:** Đã sửa lỗi. Xóa bỏ mapping `""` (chuỗi rỗng) khỏi `@WebServlet`, vì nó là nguyên nhân chặn các tệp CSS và làm "vỡ" giao diện.
+
+### src/main/java/com/toystore/controller/LoginServlet.java
+* **Lý do tạo:** Xử lý toàn bộ logic Đăng nhập.
+* **Tác dụng:**
+    1.  `doGet()`: Khi người dùng truy cập `/login` (GET), nó chỉ đơn giản là hiển thị trang `login.jsp`.
+    2.  `doPost()`: Khi người dùng gửi form (POST), nó lấy `email` và `pass`, gọi `TaiKhoanDAO.checkLogin` để xác thực.
+    3.  **Phân quyền:** Nếu thành công, nó tạo Session (`acc`) và chuyển hướng (redirect) Admin đến `/admin/dashboard` hoặc User đến `/home`.
+
+### src/main/java/com/toystore/controller/LogoutServlet.java
+* **Lý do tạo:** Xử lý logic Đăng xuất.
+* **Tác dụng:**
+    1.  Xóa session `acc` của người dùng.
+    2.  Chuyển hướng người dùng về trang đăng nhập.
+* **Trạng thái:** Đã sửa lỗi. Thay vì chuyển hướng đến tệp `login.jsp`, nó chuyển hướng đến URL `/login` (do `LoginServlet` xử lý) để đảm bảo tính nhất quán của logic.
+
+### src/main/java/com/toystore/controller/AdminServlet.java
+* **Lý do tạo:** Xử lý trang Dashboard của Admin.
+* **Tác dụng:**
+    1.  Tải dữ liệu header (categories, ảnh) vì trang Admin cũng dùng chung `header.jsp` với trang User.
+    2.  Chuyển tiếp (forward) đến `admin/dashboard.jsp` để hiển thị.
+
+------------------------------------------------------
+## C. TRUY CẬP DỮ LIỆU (DATA ACCESS OBJECT - DAO)
+------------------------------------------------------
+Các tệp này là "cánh tay" của ứng dụng, chịu trách nhiệm duy nhất là nói chuyện (truy vấn) với CSDL MySQL.
+
+### src/main/java/com/toystore/dao/DBContext.java
+* **Lý do tạo:** Cung cấp một phương thức tập trung để kết nối đến CSDL.
+* **Tác dụng:** Chứa thông tin kết nối (URL, User, Pass) và hàm `getConnection()` để các DAO khác gọi. Điều này giúp tránh lặp lại code kết nối ở nhiều nơi.
+
+### src/main/java/com/toystore/dao/TaiKhoanDAO.java
+* **Lý do tạo:** Xử lý các truy vấn liên quan đến `TaiKhoan`.
+* **Tác dụng:** Cung cấp hàm `checkLogin(email, pass)`. Nó thực hiện `JOIN` bảng `TaiKhoan` và `NguoiDung` để xác thực bằng `Email`.
+
+### src/main/java/com/toystore/dao/DanhMucDAO.java
+* **Lý do tạo:** Xử lý các truy vấn liên quan đến `DanhMuc`.
+* **Tác dụng:** Cung cấp hàm `getHeaderCategories()` để lấy 4 danh mục chính hiển thị trên header.
+
+### src/main/java/com/toystore/dao/HinhAnhDAO.java
+* **Lý do tạo:** Xử lý các truy vấn liên quan đến `HinhAnhSanPham`.
+* **Tác dụng:** Cung cấp hàm `getTop4DemoImagesByMaDM()` để lấy 4 ảnh demo cho mỗi danh mục trên header.
+
+------------------------------------------------------
+## D. BỘ LỌC (FILTER)
+------------------------------------------------------
+Các tệp này là "người gác cổng", chặn và xử lý các yêu cầu TRƯỚC KHI chúng đến được Servlet.
+
+### src/main/java/com/toystore/filter/AuthFilter.java
+* **Lý do tạo:** Bảo mật cho khu vực Admin.
+* **Ý nghĩa:** Được cấu hình (`@WebFilter`) để chặn mọi URL có dạng `/admin/*`.
+* **Tác dụng:** Kiểm tra Session `acc`. Nếu người dùng chưa đăng nhập, hoặc đăng nhập nhưng không phải `Admin`, nó sẽ "đuổi" (redirect) họ về trang login hoặc trang chủ, không cho phép đi tiếp đến `AdminServlet`.
+
+### src/main/java/com/toystore/filter/LanguageFilter.java
+* **Lý do tạo:** (Tệp mới) Tích hợp chức năng đa ngôn ngữ (i18n).
+* **Ý nghĩa:** Chặn mọi URL (`/*`).
+* **Tác dụng:**
+    1.  Kiểm tra xem URL có tham số `?lang=en` hay `?lang=vi` không.
+    2.  Nếu có, nó lưu ngôn ngữ (Locale) này vào Session.
+    3.  Nếu không có, nó đặt Tiếng Việt làm mặc định.
+    4.  Các thẻ JSTL `<fmt:message>` trong tệp JSP sẽ tự động đọc Session này để chọn ngôn ngữ hiển thị.
+
+------------------------------------------------------
+## E. ĐỐI TƯỢNG DỮ LIỆU (MODEL)
+------------------------------------------------------
+Các lớp Java (POJO) đơn giản, dùng để chứa dữ liệu lấy từ CSDL.
+
+* **src/main/java/com/toystore/model/TaiKhoan.java:** Chứa thông tin người dùng (`MaTaiKhoan`, `TenDangNhap`, `VaiTro`) được lưu trong Session.
+* **src/main/java/com/toystore/model/DanhMuc.java:** Chứa thông tin danh mục (`MaDanhMuc`, `TenDanhMuc`) và một `List<HinhAnh>` ảnh demo.
+* **src/main/java/com/toystore/model/HinhAnh.java:** Chứa thông tin ảnh (`HinhAnhId`, `HinhAnhUrl`).
+
+------------------------------------------------------
+## F. TÀI NGUYÊN ĐA NGÔN NGỮ (I18N)
+------------------------------------------------------
+Các tệp này là "cuốn từ điển" cho hệ thống i18n.
+
+### src/main/resources/messages_vi.properties
+* **Lý do tạo:** (Tệp mới) Chứa toàn bộ văn bản Tiếng Việt cho giao diện.
+* **Tác dụng:** Cung cấp các cặp key-value (ví dụ: `hero.title=Chào Mừng...`) cho JSTL sử dụng khi Session được đặt là 'vi'.
+
+### src/main/resources/messages_en.properties
+* **Lý do tạo:** (Tệp mới) Chứa toàn bộ văn bản Tiếng Anh cho giao diện.
+* **Tác dụng:** Sử dụng CÙNG KEY với tệp `_vi` (ví dụ: `hero.title=Welcome...`) cho JSTL sử dụng khi Session được đặt là 'en'.
+
+------------------------------------------------------
+## G. GIAO DIỆN NGƯỜI DÙNG (VIEW - JSP)
+------------------------------------------------------
+Các tệp này là "bộ mặt" của ứng dụng, chịu trách nhiệm hiển thị HTML.
+
+### src/main/webapp/common/header.jsp
+* **Lý do tạo:** Tạo phần đầu trang (logo, menu, tìm kiếm, giỏ hàng) có thể tái sử dụng.
+* **Tác dụng:** Được `index.jsp` và `dashboard.jsp` "include" (nhúng) vào.
+* **Trạng thái:** Đã sửa lỗi.
+    1.  (Sửa lỗi) Đường dẫn logo đã được sửa (dùng `contextPath`) để tránh lỗi 404.
+    2.  (Cập nhật i18n) Tất cả văn bản tĩnh (như "Bộ Lọc", "Tìm kiếm") đã được thay thế bằng thẻ `<fmt:message>`.
+    3.  (Cập nhật i18n) Icon lá cờ (Việt Nam/Mỹ) giờ đây hiển thị động dựa trên ngôn ngữ trong Session.
+
+### src/main/webapp/common/footer.jsp
+* **Lý do tạo:** Tạo phần chân trang (bản quyền, links) có thể tái sử dụng.
+* **Tác dụng:** Được `index.jsp` và `dashboard.jsp` "include" (nhúng) vào.
+* **Trạng thái:** Đã sửa lỗi & Cập nhật.
+    1.  (Cập nhật i18n) Văn bản tĩnh được thay bằng `<fmt:message>`.
+    2.  (Cập nhật i18n) Logic của Modal chọn ngôn ngữ được cập nhật để "check" (chọn sẵn) ngôn ngữ hiện tại đang được lưu trong Session.
+
+### src/main/webapp/user/index.jsp
+* **Lý do tạo:** Đây là trang chủ chính mà người dùng nhìn thấy.
+* **Tác dụng:** Hiển thị banner (hero-banner) và danh sách sản phẩm nổi bật.
+* **Trạng thái:** Đã sửa lỗi & Cập nhật.
+    1.  (Cập nhật i18n) Tích hợp nội dung từ `giaodien.html` và `giaodien2.html`.
+    2.  (Cập nhật i18n) Toàn bộ văn bản đã được thay thế bằng thẻ `<fmt:message>` để hỗ trợ đa ngôn ngữ.
+
+### src/main/webapp/admin/dashboard.jsp
+* **Lý do tạo:** Trang quản trị của Admin.
+* **Tác dụng:** Hiển thị lời chào Admin (lấy từ Session `acc`).
+
+### src/main/webapp/login.jsp
+* **Lý do tạo:** Giao diện HTML cho trang Đăng nhập.
+* **Tác dụng:** Chứa form (biểu mẫu) HTML gửi dữ liệu (POST) đến `LoginServlet`.
+
+------------------------------------------------------
+## H. TÀI NGUYÊN TĨNH (ASSETS & STATIC)
+------------------------------------------------------
+
+### src/main/webapp/assets/css/style.css
+* **Lý do tạo:** Tệp CSS chính, định nghĩa giao diện (màu sắc, bố cục, font chữ)

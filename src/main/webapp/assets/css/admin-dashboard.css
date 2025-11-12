@@ -1,0 +1,190 @@
+/* 🌈 Giao diện tổng thể */
+body {
+    background-color: #f8f9fc;
+    font-family: "Inter", "Poppins", sans-serif;
+    color: #333;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* 🔹 Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 240px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem 0;
+    z-index: 100;
+}
+
+.sidebar .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4f46e5;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li {
+    margin: 6px 0;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.sidebar ul li a i {
+    font-size: 1.1rem;
+}
+
+/* 🔹 Header */
+.header {
+    position: fixed;
+    left: 240px;
+    top: 0;
+    right: 0;
+    height: 64px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 90;
+}
+
+.header .search-bar {
+    width: 280px;
+    position: relative;
+}
+
+.header .search-bar input {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 30px;
+    padding: 8px 35px 8px 15px;
+    outline: none;
+}
+
+.header .search-bar i {
+    position: absolute;
+    right: 12px;
+    top: 9px;
+    color: #888;
+}
+
+/* 🔹 Main Content */
+.main {
+    margin-left: 260px;
+    margin-top: 80px;
+    padding: 2rem;
+}
+
+/* 🔹 Dashboard Cards */
+.dashboard-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* 🔹 Section titles */
+.section-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+/* 🔹 Product cards */
+.product-card {
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.product-card:hover {
+    transform: scale(1.02);
+}
+
+.product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+.product-card .info {
+    padding: 1rem;
+}
+.product-card h6 {
+    font-weight: 600;
+    font-size: 1rem;
+}
+.product-card .price {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* 🔹 Table */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.table thead {
+    background: #eef2ff;
+    color: #111827;
+    font-weight: 600;
+}
+
+/* 🔹 Status badges */
+.badge-paid {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 3px 8px;
+}
+.badge-pending {
+    background: #d1fae5;
+    color: #065f46;
+    border-radius: 10px;
+    padding: 3px 8px;
+}
+.badge-unpaid {
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 10px;
+    padding: 3px 8px;
+}
